@@ -1,4 +1,3 @@
-# backend/main.py
 import cv2
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse
@@ -6,8 +5,9 @@ from ultralytics import YOLO
 import os
 from pathlib import Path
 import shutil
-
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.responses import StreamingResponse
+import platform
 
 app = FastAPI()
 
@@ -37,6 +37,18 @@ except Exception as e:
     print(f"Error loading YOLO model: {e}")
     model = None
 
+# Determine the appropriate codec based on the operating system
+def get_video_writer(filename, fps, frame_size):
+    system = platform.system().lower()
+    if system == "darwin":  # macOS
+        fourcc = cv2.VideoWriter_fourcc(*'avc1')  # H.264 codec
+    elif system == "windows":
+        fourcc = cv2.VideoWriter_fourcc(*'H264')
+    else:  # Linux and others
+        fourcc = cv2.VideoWriter_fourcc(*'X264')
+    
+    return cv2.VideoWriter(filename, fourcc, fps, frame_size)
+
 @app.post("/upload_video/")
 async def upload_video(file: UploadFile = File(...)):
     if not model:
@@ -61,8 +73,12 @@ async def upload_video(file: UploadFile = File(...)):
         fps = int(cap.get(cv2.CAP_PROP_FPS))
         
         output_path = OUTPUTS_DIR / f"processed_{file.filename}"
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(str(output_path), fourcc, fps, (frame_width, frame_height))
+        
+        # Use platform-specific codec
+        out = get_video_writer(str(output_path), fps, (frame_width, frame_height))
+        
+        if not out.isOpened():
+            raise HTTPException(status_code=500, detail="Failed to create video writer")
 
         while True:
             ret, frame = cap.read()
@@ -78,10 +94,15 @@ async def upload_video(file: UploadFile = File(...)):
         # Clean up uploaded file
         video_path.unlink()
 
+        # Return processed video with appropriate headers
         return FileResponse(
             path=output_path,
             media_type="video/mp4",
-            filename=f"processed_{file.filename}"
+            headers={
+                "Content-Disposition": f'attachment; filename="processed_{file.filename}"',
+                "Accept-Ranges": "bytes",
+                "Cache-Control": "no-cache"
+            }
         )
 
     except Exception as e:
@@ -96,13 +117,33 @@ async def upload_video(file: UploadFile = File(...)):
 async def health_check():
     return {"status": "healthy", "model_loaded": model is not None}
 
-# New route to serve processed videos
 @app.get("/outputs/{filename}")
 async def get_processed_video(filename: str):
     video_path = OUTPUTS_DIR / filename
     if not video_path.exists():
         raise HTTPException(status_code=404, detail="Video file not found")
-    return FileResponse(video_path, media_type="video/mp4", filename=filename)
     
-    
+    # Return video with appropriate headers for streaming
+    return FileResponse(
+        path=video_path,
+        media_type="video/mp4",
+        headers={
+            "Accept-Ranges": "bytes",
+            "Cache-Control": "no-cache",
+            "Content-Disposition": f'inline; filename="{filename}"'
+        }
+    )
 
+# Optional: Add route for checking available codecs
+@app.get("/check_codecs")
+async def check_codecs():
+    """Debug endpoint to check available codecs"""
+    test_codecs = ['avc1', 'H264', 'X264', 'XVID', 'MJPG']
+    available_codecs = {}
+    for codec in test_codecs:
+        try:
+            test = cv2.VideoWriter_fourcc(*codec)
+            available_codecs[codec] = test is not None
+        except Exception as e:
+            available_codecs[codec] = False
+    return {"available_codecs": available_codecs}
