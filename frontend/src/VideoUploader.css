@@ -1,0 +1,151 @@
+/* Container that centers everything on the page */
+.video-uploader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #A5C6F2, #73A6F9);
+  padding: 20px;
+}
+
+/* Main uploader card */
+.video-uploader {
+  background-color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Title styles */
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Error and status messages */
+.status-error {
+  padding: 10px;
+  background-color: #FFEBEE;
+  color: #D32F2F;
+  border: 1px solid #D32F2F;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+/* File input styles to match buttons */
+.file-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 2px solid #cccccc;
+  margin-bottom: 15px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+/* Align the buttons and input properly */
+.input-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Button styles */
+.upload-btn, .download-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-top: 10px;
+  display: inline-block;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+.upload-btn {
+  background-color: #3B82F6;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.upload-btn:hover {
+  background-color: #2563EB;
+}
+
+.upload-btn.disabled {
+  background-color: #B0C9F9;
+  cursor: not-allowed;
+}
+
+.download-btn {
+  background-color: #34D399;
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.download-btn:hover {
+  background-color: #10B981;
+}
+
+/* Processed video section */
+.processed-video-section {
+  margin-top: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.processed-video-section h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* Video player */
+.video-player {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 15px;
+}
+
+/* Ensure video doesn't overflow */
+video {
+  width: 100%;
+  border-radius: 8px;
+  height: auto;
+}
+
+/* Adjust download button */
+.download-btn {
+  margin-top: 15px;
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  display: inline-block;
+  text-align: center;
+  background-color: #34D399;
+  color: white;
+}
+
+.download-btn:hover {
+  background-color: #10B981;
+}
